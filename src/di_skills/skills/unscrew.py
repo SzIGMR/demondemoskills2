@@ -22,7 +22,8 @@ class Unscrew(Skill):
         await ctx.status(f"precheck ok for {target}", 5)
 
     async def execute(self, ctx: SkillContext, params: Dict[str, str]) -> Dict[str, str]:
-        torque = params.get("torque", "5")
+        default_torque = ctx.config.skills.Unscrew.default_torque
+        torque = params.get("torque", str(default_torque))
         target = params["target_id"]
         screws = ctx.dbase.get("screws", {}) or {}
         info = screws.get(target, {})

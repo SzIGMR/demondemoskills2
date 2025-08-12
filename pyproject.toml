@@ -9,8 +9,10 @@ description = "di.core MVP with internal skill communication"
 authors = [{ name = "di.monta" }]
 requires-python = ">=3.10"
 dependencies = [
-  "pydantic>=2.6",
+  "pydantic>=1.10,<2",
   "typer>=0.9",
+  "fastapi>=0.95,<0.100",
+  "uvicorn>=0.23",
 ]
 
 [project.scripts]
