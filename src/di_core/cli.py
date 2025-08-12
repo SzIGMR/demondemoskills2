@@ -12,6 +12,8 @@ from di_skills.skills import unscrew as _  # noqa: F401
 app = typer.Typer(help="di.core MVP CLI")
 skills_app = typer.Typer(help="Manage skills")
 db_app = typer.Typer(help="Inspect database")
+web_app = typer.Typer(help="Web utilities")
+
 app.add_typer(skills_app, name="skills")
 app.add_typer(db_app, name="db")
 web_app = typer.Typer(help="Web utilities")
@@ -76,5 +78,12 @@ def web_config(host: str = "0.0.0.0", port: int = 8000):
 
     uvicorn.run(webapp, host=host, port=port)
 
-if __name__ == "__main__":
+app.add_typer(web_app, name="web")
+
+
+def main() -> None:
     app()
+
+
+if __name__ == "__main__":
+    main()
