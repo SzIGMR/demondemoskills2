@@ -56,7 +56,8 @@ class ConfigManager:
         self._path = Path(path)
         if self._path.exists():
             try:
-                self.config = AppConfig.model_validate_json(self._path.read_text())
+                # pydantic v1 uses ``parse_raw`` to load from JSON text
+                self.config = AppConfig.parse_raw(self._path.read_text())
             except Exception:  # noqa: BLE001 - fall back to defaults
                 self.config = AppConfig()
         else:
@@ -65,12 +66,16 @@ class ConfigManager:
     def save(self) -> None:
         """Persist the current configuration to disk."""
 
-        self._path.write_text(self.config.model_dump_json(indent=2))
+        # ``json()`` serializes a model to JSON in pydantic v1
+        self._path.write_text(self.config.json(indent=2))
+
 
     def update(self, data: dict) -> AppConfig:
         """Update configuration with ``data`` and persist it."""
 
-        self.config = self.config.model_copy(update=data)
+        # ``copy(update=...)`` updates the model in pydantic v1
+        self.config = self.config.copy(update=data)
+
         self.save()
         return self.config
 
