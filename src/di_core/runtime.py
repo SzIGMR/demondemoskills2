@@ -3,7 +3,7 @@ import asyncio
 from typing import AsyncIterator, Optional
 from di_core.api import ExecuteRequest, ExecuteStatus, ExecuteResult
 from di_core.registry import registry
-from di_skills.base import SkillContext
+from di_skills import SkillContext
 from di_base_client.client import DiBaseClient
 
 class Runtime:
