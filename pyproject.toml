@@ -15,6 +15,7 @@ dependencies = [
 
 [project.scripts]
 dimonta = "di_core.cli:app"
+skill-docs = "di_skills.docgen:main"
 
 [tool.setuptools]
 package-dir = {"" = "src"}
