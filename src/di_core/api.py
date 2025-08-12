@@ -19,3 +19,19 @@ class Status:
     success: bool
     result: Any = None
     error: Optional[str] = None
+
+
+@dataclass
+class ExecuteRequest:
+    """Request object for the asynchronous runtime."""
+
+    skill_name: str
+    instance_id: str
+    params: Dict[str, str]
+
+
+@dataclass
+class StatusEvent:
+    """Event yielded during execution."""
+
+    phase: str
