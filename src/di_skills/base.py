@@ -4,11 +4,13 @@ from typing import Dict, Callable, Awaitable
 from pydantic import BaseModel
 from di_core.api import ExecuteStatus
 from di_core.registry import registry
+from di_core.config import AppConfig
 
 class SkillContext(BaseModel):
     instance_id: str
     dbase: object
     emit: Callable[[ExecuteStatus], None]
+    config: AppConfig
 
     class Config:
         arbitrary_types_allowed = True
