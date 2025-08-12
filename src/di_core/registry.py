@@ -1,6 +1,12 @@
 from __future__ import annotations
-from typing import Dict, Type, List
-from di_skills.base import Skill
+from typing import Dict, Type, List, TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from di_skills.base import Skill
+else:  # pragma: no cover - used only for typing
+    class Skill:  # type: ignore[too-many-ancestors]
+        """Runtime placeholder for Skill type."""
+        pass
 
 class SkillRegistry:
     def __init__(self) -> None:
