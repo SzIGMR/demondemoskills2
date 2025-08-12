@@ -1,11 +1,17 @@
 from __future__ import annotations
+
+import argparse
 import inspect
+import sys
 from pathlib import Path
+
 from di_core.registry import registry
 from . import skills  # ensure all skills are registered
 
 
-def generate_docs(dest: Path) -> str:
+def generate_docs() -> str:
+    """Generate markdown documentation for all registered skills."""
+
     lines = ["# Skill Documentation", ""]
     for name in registry.list():
         cls = registry.get(name)
@@ -26,15 +32,27 @@ def generate_docs(dest: Path) -> str:
             for k, v in outputs.items():
                 lines.append(f"- `{k}`: {v}")
             lines.append("")
-    content = "\n".join(lines).strip() + "\n"
-    dest.parent.mkdir(parents=True, exist_ok=True)
-    dest.write_text(content)
-    return content
+    return "\n".join(lines).strip() + "\n"
 
 
 def main() -> None:
-    doc_path = Path(__file__).resolve().parents[2] / "docs" / "skills.md"
-    generate_docs(doc_path)
+    """CLI entry point for generating skill documentation."""
+
+    parser = argparse.ArgumentParser(description="Generate skill documentation")
+    parser.add_argument(
+        "dest",
+        nargs="?",
+        help="Optional path to write markdown output. If omitted, prints to stdout.",
+    )
+    args = parser.parse_args()
+
+    content = generate_docs()
+    if args.dest:
+        path = Path(args.dest)
+        path.parent.mkdir(parents=True, exist_ok=True)
+        path.write_text(content)
+    else:
+        sys.stdout.write(content)
 
 
 if __name__ == "__main__":
