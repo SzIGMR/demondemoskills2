@@ -1,25 +1,23 @@
 from __future__ import annotations
+from typing import Dict, Type, List
+from di_skills.base import Skill
 
-from typing import Dict, List, Type, TYPE_CHECKING
-
-if TYPE_CHECKING:  # pragma: no cover - for type checkers only
-    from di_skills.base import Skill
-
-
-class Registry:
-    """Simple in-memory registry for skills."""
-
+class SkillRegistry:
     def __init__(self) -> None:
-        self._skills: Dict[str, Type["Skill"]] = {}
+        self._skills: Dict[str, Type[Skill]] = {}
 
-    def register(self, cls: Type["Skill"]) -> None:
-        self._skills[cls.NAME] = cls
+    def register(self, cls: Type[Skill]):
+        name = getattr(cls, "NAME", cls.__name__)
+        self._skills[name] = cls
+        return cls
 
-    def get(self, name: str):  # type: ignore[return-type]
-        return self._skills.get(name)
+    def get(self, name: str) -> Type[Skill]:
+        if name not in self._skills:
+            raise KeyError(f"Skill '{name}' not found")
+        return self._skills[name]
 
     def list(self) -> List[str]:
-        return sorted(self._skills)
+        return sorted(self._skills.keys())
 
-
-registry = Registry()
+# global registry instance
+registry = SkillRegistry()
