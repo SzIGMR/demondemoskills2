@@ -36,6 +36,18 @@ Inspect the small in-memory database:
 dimonta db show
 ```
 
+### Configuration
+
+Configuration values for the runtime, database and individual skills are stored
+in ``config.json`` (created on first write).  To edit the configuration in a
+browser run the built-in web UI:
+
+```bash
+dimonta web config --port 8000
+```
+
+Open ``http://localhost:8000`` in your browser and adjust the JSON as needed.
+
 ## Demo Ideas
 
 - **Full Screw Workflow** – Run a sequence of skills to detect screws,

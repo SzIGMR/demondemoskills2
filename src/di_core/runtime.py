@@ -5,12 +5,14 @@ from di_core.api import ExecuteRequest, ExecuteStatus, ExecuteResult
 from di_core.registry import registry
 from di_skills import SkillContext
 from di_base_client.client import DiBaseClient
+from di_core.config import config_manager
 
 class Runtime:
     def __init__(self) -> None:
         self._tasks: dict[str, asyncio.Task] = {}
         self._status_queues: dict[str, asyncio.Queue] = {}
-        self._dbase = DiBaseClient()
+        db_path = config_manager.config.database.path
+        self._dbase = DiBaseClient(path=db_path)
 
     async def execute(self, req: ExecuteRequest) -> AsyncIterator[ExecuteStatus]:
         # queue for streaming statuses to the caller
@@ -23,7 +25,12 @@ class Runtime:
             try:
                 await q.put(ExecuteStatus(instance_id=req.instance_id, phase="RUNNING", message="starting", progress_pct=1))
                 skill_cls = registry.get(req.skill_name)
-                ctx = SkillContext(instance_id=req.instance_id, dbase=self._dbase, emit=lambda st: q.put_nowait(st))
+                ctx = SkillContext(
+                    instance_id=req.instance_id,
+                    dbase=self._dbase,
+                    emit=lambda st: q.put_nowait(st),
+                    config=config_manager.config,
+                )
                 skill = skill_cls()
                 await skill.precheck(ctx, req.params)
                 outputs = await skill.execute(ctx, req.params)

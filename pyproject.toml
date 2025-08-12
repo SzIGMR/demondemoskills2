@@ -11,6 +11,8 @@ requires-python = ">=3.10"
 dependencies = [
   "pydantic>=2.6",
   "typer>=0.9",
+  "fastapi>=0.110",
+  "uvicorn>=0.23",
 ]
 
 [project.scripts]
