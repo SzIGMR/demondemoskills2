@@ -1,21 +1,26 @@
 from __future__ import annotations
-
-from dataclasses import dataclass
-from typing import Any, Dict, Optional
-
-
-@dataclass
-class Request:
-    """Represents a skill execution request."""
-
-    name: str
-    params: Dict[str, Any]
+from pydantic import BaseModel, Field
+from typing import Dict, Literal
 
 
-@dataclass
-class Status:
-    """Result of executing a skill."""
+class ExecuteRequest(BaseModel):
+    skill_name: str
+    instance_id: str
+    params: Dict[str, str] = Field(default_factory=dict)
 
+
+Phase = Literal["QUEUED", "RUNNING", "COMPLETED", "FAILED", "ABORTED"]
+
+
+class ExecuteStatus(BaseModel):
+    instance_id: str
+    phase: Phase
+    message: str = ""
+    progress_pct: int = 0
+
+
+class ExecuteResult(BaseModel):
+    instance_id: str
     success: bool
-    result: Any = None
-    error: Optional[str] = None
+    outputs: Dict[str, str] = Field(default_factory=dict)
+    message: str = ""

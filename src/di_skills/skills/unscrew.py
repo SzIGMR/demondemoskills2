@@ -1,16 +1,14 @@
 from __future__ import annotations
 
-from di_core.registry import register
-from di_skills.base import BaseSkill
+from di_core.registry import registry
+from di_skills.base import Skill, SkillContext
 
 
-class UnscrewSkill(BaseSkill):
-    """Simple skill that returns a confirmation string."""
+@registry.register
+class UnscrewSkill(Skill):
+    """Simple skill that returns a confirmation output."""
 
-    name = "unscrew"
+    NAME = "unscrew"
 
-    def execute(self, **kwargs):  # type: ignore[override]
-        return "unscrewed"
-
-
-register(UnscrewSkill.name, UnscrewSkill)
+    async def execute(self, ctx: SkillContext, params: dict[str, str]):  # type: ignore[override]
+        return {"result": "unscrewed"}

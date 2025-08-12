@@ -1,12 +1,17 @@
-from di_core.api import Request
-from di_core.registry import list_skills
-from di_core.runtime import execute
-import di_skills.skills.unscrew  # noqa: F401 - ensures registration
+import pytest
+from di_core.api import ExecuteRequest
+from di_core.runtime import Runtime
+from di_core.registry import registry
+import di_skills.skills.unscrew  # noqa: F401 - ensure registration
 
 
-def test_execute_unscrew():
-    assert "unscrew" in list_skills()
-    request = Request(name="unscrew", params={})
-    status = execute(request)
-    assert status.success
-    assert status.result == "unscrewed"
+@pytest.mark.asyncio
+async def test_execute_unscrew():
+    rt = Runtime()
+    req = ExecuteRequest(skill_name="unscrew", instance_id="abc123", params={})
+
+    statuses = [st async for st in rt.execute(req)]
+    assert [s.phase for s in statuses] == ["QUEUED", "RUNNING", "COMPLETED"]
+    assert registry.list() == ["unscrew"]
+    assert rt._dbase.results["abc123"] == {"result": "unscrewed"}
+    assert rt.list_instances() == []

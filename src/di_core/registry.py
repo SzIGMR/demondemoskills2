@@ -1,22 +1,25 @@
 from __future__ import annotations
-
-from typing import Dict, List, Optional, Type
-
-from di_skills.base import BaseSkill
-
-_registry: Dict[str, Type[BaseSkill]] = {}
+from typing import Dict, Type, List
+from di_skills.base import Skill
 
 
-def register(name: str, skill_cls: Type[BaseSkill]) -> None:
-    """Register a skill class under a name."""
-    _registry[name] = skill_cls
+class SkillRegistry:
+    def __init__(self) -> None:
+        self._skills: Dict[str, Type[Skill]] = {}
+
+    def register(self, cls: Type[Skill]):
+        name = getattr(cls, "NAME", cls.__name__)
+        self._skills[name] = cls
+        return cls
+
+    def get(self, name: str) -> Type[Skill]:
+        if name not in self._skills:
+            raise KeyError(f"Skill '{name}' not found")
+        return self._skills[name]
+
+    def list(self) -> List[str]:
+        return sorted(self._skills.keys())
 
 
-def get(name: str) -> Optional[Type[BaseSkill]]:
-    """Retrieve a skill class by name."""
-    return _registry.get(name)
-
-
-def list_skills() -> List[str]:
-    """Return the names of all registered skills."""
-    return sorted(_registry)
+# global registry instance
+registry = SkillRegistry()
