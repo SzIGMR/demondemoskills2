@@ -69,11 +69,13 @@ class ConfigManager:
         # ``json()`` serializes a model to JSON in pydantic v1
         self._path.write_text(self.config.json(indent=2))
 
+
     def update(self, data: dict) -> AppConfig:
         """Update configuration with ``data`` and persist it."""
 
         # ``copy(update=...)`` updates the model in pydantic v1
         self.config = self.config.copy(update=data)
+
         self.save()
         return self.config
 
