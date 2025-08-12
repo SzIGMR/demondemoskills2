@@ -21,6 +21,8 @@ class SkillContext(BaseModel):
 class Skill:
     NAME: str = "Skill"
     VERSION: str = "0.1.0"
+    INPUTS: Dict[str, str] = {}
+    OUTPUTS: Dict[str, str] = {}
 
     async def precheck(self, ctx: SkillContext, params: Dict[str, str]) -> None:  # noqa: D401
         """Override to implement safety/availability checks."""
