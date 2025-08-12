@@ -50,7 +50,7 @@ Open ``http://localhost:8000`` in your browser and adjust the JSON as needed.
 
 ## Demo Ideas
 
-- **Full Screw Workflow** – Run a sequence of skills to detect screws,
+- **Manual Full Screw Workflow** – Run a sequence of skills to detect screws,
   refine the position of one screw and remove it:
 
   ```bash
@@ -59,6 +59,12 @@ Open ``http://localhost:8000`` in your browser and adjust the JSON as needed.
   dimonta skills exec LocateScrew -p screw_id=S1
   dimonta skills exec Unscrew -p target_id=S1 -p torque=5
 
+  ```
+
+- **Automated Full Screw Removal** - run the full sequence based on an image handeled by a behaviour tree;
+
+  ```bash
+  dimonta skills exec ScrewRemovalWorkflow -p image_path=img.png
   ```
 
 - **Generate Skill Documentation** – Recreate the markdown overview of
