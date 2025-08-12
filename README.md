@@ -46,6 +46,7 @@ dimonta db show
   dimonta skills exec DismantlingPlanner
   dimonta skills exec LocateScrew -p screw_id=S1
   dimonta skills exec Unscrew -p target_id=S1 -p torque=5
+
   ```
 
 - **Generate Skill Documentation** – Recreate the markdown overview of
@@ -53,6 +54,13 @@ dimonta db show
 
   ```bash
   skill-docs > docs/skills.md
+  ```
+
+  The command prints the markdown to `stdout`, so you may also supply a
+  destination path directly:
+
+  ```bash
+  skill-docs docs/skills.md
   ```
 
 These examples are a starting point for experimenting with new skills or
