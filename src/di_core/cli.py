@@ -14,6 +14,8 @@ skills_app = typer.Typer(help="Manage skills")
 db_app = typer.Typer(help="Inspect database")
 app.add_typer(skills_app, name="skills")
 app.add_typer(db_app, name="db")
+web_app = typer.Typer(help="Web utilities")
+app.add_typer(web_app, name="web")
 
 @skills_app.command("list")
 def skills_list():
@@ -63,6 +65,16 @@ def db_show():
     """Print current contents of the database."""
     rt = Runtime()
     typer.echo(json.dumps(rt._dbase.dump(), indent=2))
+
+
+@web_app.command("config")
+def web_config(host: str = "0.0.0.0", port: int = 8000):
+    """Launch the configuration web UI."""
+
+    import uvicorn
+    from di_core.web import app as webapp
+
+    uvicorn.run(webapp, host=host, port=port)
 
 if __name__ == "__main__":
     app()
