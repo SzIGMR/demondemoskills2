@@ -43,9 +43,9 @@ dimonta db show
 
   ```bash
   dimonta skills exec DetectScrews -p image_path=img.png
+  dimonta skills exec DismantlingPlanner
   dimonta skills exec LocateScrew -p screw_id=S1
   dimonta skills exec Unscrew -p target_id=S1 -p torque=5
-  dimonta skills exec DismantlingPlanner
   ```
 
 - **Generate Skill Documentation** – Recreate the markdown overview of
