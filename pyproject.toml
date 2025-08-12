@@ -1,14 +1,21 @@
 [build-system]
-requires = ["setuptools>=61.0"]
+requires = ["setuptools>=68", "wheel"]
 build-backend = "setuptools.build_meta"
 
 [project]
-name = "demondemoskills"
+name = "dimonta-core-mvp"
 version = "0.1.0"
-description = "Demo skill execution framework"
-authors = [{name = "Demo"}]
-requires-python = ">=3.8"
-dependencies = []
+description = "di.core MVP with internal skill communication"
+authors = [{ name = "di.monta" }]
+requires-python = ">=3.10"
+dependencies = [
+  "pydantic>=2.6",
+  "typer>=0.9",
+]
 
-[tool.pytest.ini_options]
-pythonpath = ["src"]
+[project.scripts]
+dimonta = "di_core.cli:app"
+
+[tool.setuptools]
+package-dir = {"" = "src"}
+packages = ["di_core", "di_skills", "di_base_client", "di_skills.skills", "di_skills.templates.python"]
