@@ -1,10 +1,9 @@
 from __future__ import annotations
 import asyncio
-from typing import Dict, Callable
+from typing import Dict, Callable, Awaitable
 from pydantic import BaseModel
 from di_core.api import ExecuteStatus
 from di_core.registry import registry
-
 
 class SkillContext(BaseModel):
     instance_id: str
@@ -19,7 +18,6 @@ class SkillContext(BaseModel):
         self.emit(st)
         await asyncio.sleep(0)
 
-
 class Skill:
     NAME: str = "Skill"
     VERSION: str = "0.1.0"
@@ -31,7 +29,6 @@ class Skill:
     async def execute(self, ctx: SkillContext, params: Dict[str, str]) -> Dict[str, str]:  # noqa: D401
         """Override to perform the skill. Must return outputs as dict of strings."""
         raise NotImplementedError
-
 
 # decorator for registration
 def register(cls):
