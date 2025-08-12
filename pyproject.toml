@@ -8,7 +8,9 @@ version = "0.1.0"
 description = "Demo skill execution framework"
 authors = [{name = "Demo"}]
 requires-python = ">=3.8"
-dependencies = []
+dependencies = [
+    "pydantic>=1.10,<2.0"
+]
 
 [tool.pytest.ini_options]
 pythonpath = ["src"]

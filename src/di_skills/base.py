@@ -1,18 +1,26 @@
 from __future__ import annotations
-
 from abc import ABC, abstractmethod
-from typing import Any
+from dataclasses import dataclass
+from typing import Any, Callable, Dict
 
 
-class BaseSkill(ABC):
-    """Abstract base class for all skills."""
+@dataclass
+class SkillContext:
+    instance_id: str
+    dbase: Any
+    emit: Callable[[Any], None]
 
-    name: str
 
-    def __init__(self, **context: Any) -> None:
-        self.context = context
+class Skill(ABC):
+    """Base class for asynchronous skills."""
+
+    NAME: str
+
+    async def precheck(self, ctx: SkillContext, params: Dict[str, str]) -> None:
+        """Optional pre-execution checks."""
+        return None
 
     @abstractmethod
-    def execute(self, **kwargs: Any) -> Any:
-        """Run the skill's logic."""
+    async def execute(self, ctx: SkillContext, params: Dict[str, str]) -> Dict[str, str]:
+        """Run the skill's logic and return outputs."""
         raise NotImplementedError
