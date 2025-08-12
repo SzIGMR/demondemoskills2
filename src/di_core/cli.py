@@ -70,7 +70,7 @@ def db_show():
 
 
 @web_app.command("config")
-def web_config(host: str = "0.0.0.0", port: int = 8000):
+def web_config(host: str = "localhost", port: int = 8000):
     """Launch the configuration web UI."""
 
     import uvicorn
