@@ -11,7 +11,9 @@ from di_skills.skills import unscrew as _  # noqa: F401
 
 app = typer.Typer(help="di.core MVP CLI")
 skills_app = typer.Typer(help="Manage skills")
+db_app = typer.Typer(help="Inspect database")
 app.add_typer(skills_app, name="skills")
+app.add_typer(db_app, name="db")
 
 @skills_app.command("list")
 def skills_list():
@@ -54,6 +56,13 @@ def skills_abort(instance_id: str):
     rt = Runtime()
     ok = rt.abort(instance_id)
     typer.echo("aborted" if ok else "not found or already finished")
+
+
+@db_app.command("show")
+def db_show():
+    """Print current contents of the database."""
+    rt = Runtime()
+    typer.echo(json.dumps(rt._dbase.dump(), indent=2))
 
 if __name__ == "__main__":
     app()
