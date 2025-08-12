@@ -1,86 +1,60 @@
 from __future__ import annotations
-
 import asyncio
-import json
-from typing import AsyncGenerator, Dict
-
-from di_core.api import ExecuteRequest, ExecuteStatus
+from typing import AsyncIterator, Optional
+from di_core.api import ExecuteRequest, ExecuteStatus, ExecuteResult
 from di_core.registry import registry
 from di_skills.base import SkillContext
-
+from di_base_client.client import DiBaseClient
 
 class Runtime:
-    """Runtime responsible for executing skills asynchronously."""
-
     def __init__(self) -> None:
-        self._tasks: Dict[str, asyncio.Task] = {}
+        self._tasks: dict[str, asyncio.Task] = {}
+        self._status_queues: dict[str, asyncio.Queue] = {}
+        self._dbase = DiBaseClient()
 
-    async def _run(self, req: ExecuteRequest, queue: asyncio.Queue[ExecuteStatus | None]) -> None:
-        skill_cls = registry.get(req.skill_name)
-        if not skill_cls:
-            await queue.put(
-                ExecuteStatus(
-                    instance_id=req.instance_id,
-                    phase="ERROR",
-                    message="skill not found",
-                    progress_pct=0,
-                )
-            )
-            await queue.put(None)
-            return
+    async def execute(self, req: ExecuteRequest) -> AsyncIterator[ExecuteStatus]:
+        # queue for streaming statuses to the caller
+        q: asyncio.Queue[ExecuteStatus] = asyncio.Queue()
+        self._status_queues[req.instance_id] = q
 
-        ctx = SkillContext(instance_id=req.instance_id, dbase=None, emit=queue.put_nowait)
-        skill = skill_cls()
-        try:
-            await skill.precheck(ctx, req.params)
-            outputs = await skill.execute(ctx, req.params)
-            await queue.put(
-                ExecuteStatus(
-                    instance_id=req.instance_id,
-                    phase="DONE",
-                    message=json.dumps(outputs),
-                    progress_pct=100,
-                )
-            )
-        except asyncio.CancelledError:
-            await queue.put(
-                ExecuteStatus(
-                    instance_id=req.instance_id,
-                    phase="ABORTED",
-                    message="aborted",
-                    progress_pct=100,
-                )
-            )
-            raise
-        except Exception as exc:  # pragma: no cover - unexpected errors
-            await queue.put(
-                ExecuteStatus(
-                    instance_id=req.instance_id,
-                    phase="ERROR",
-                    message=str(exc),
-                    progress_pct=100,
-                )
-            )
-        finally:
-            await queue.put(None)
+        await q.put(ExecuteStatus(instance_id=req.instance_id, phase="QUEUED", message="queued", progress_pct=0))
 
-    async def execute(self, req: ExecuteRequest) -> AsyncGenerator[ExecuteStatus, None]:
-        queue: asyncio.Queue[ExecuteStatus | None] = asyncio.Queue()
-        task = asyncio.create_task(self._run(req, queue))
+        async def _run():
+            try:
+                await q.put(ExecuteStatus(instance_id=req.instance_id, phase="RUNNING", message="starting", progress_pct=1))
+                skill_cls = registry.get(req.skill_name)
+                ctx = SkillContext(instance_id=req.instance_id, dbase=self._dbase, emit=lambda st: q.put_nowait(st))
+                skill = skill_cls()
+                await skill.precheck(ctx, req.params)
+                outputs = await skill.execute(ctx, req.params)
+                await q.put(ExecuteStatus(instance_id=req.instance_id, phase="COMPLETED", message="done", progress_pct=100))
+                self._dbase.log_result(req.instance_id, outputs)
+            except asyncio.CancelledError:
+                await q.put(ExecuteStatus(instance_id=req.instance_id, phase="ABORTED", message="aborted", progress_pct=0))
+                raise
+            except Exception as e:  # noqa: BLE001
+                await q.put(ExecuteStatus(instance_id=req.instance_id, phase="FAILED", message=str(e), progress_pct=0))
+            finally:
+                await asyncio.sleep(0)  # let consumer drain
+                q.put_nowait(None)  # sentinel for consumer
+                self._status_queues.pop(req.instance_id, None)
+                self._tasks.pop(req.instance_id, None)
+
+        task = asyncio.create_task(_run(), name=f"skill-{req.instance_id}")
         self._tasks[req.instance_id] = task
-        try:
-            while True:
-                st = await queue.get()
-                if st is None:
-                    break
-                yield st
-        finally:
-            task.cancel()
-            self._tasks.pop(req.instance_id, None)
 
-    def abort(self, run_id: str) -> bool:
-        task = self._tasks.get(run_id)
-        if task and not task.done():
-            task.cancel()
+        while True:
+            st = await q.get()
+            if st is None:  # sentinel
+                break
+            yield st
+
+    def abort(self, instance_id: str) -> bool:
+        t = self._tasks.get(instance_id)
+        if t and not t.done():
+            t.cancel()
             return True
         return False
+
+    def list_instances(self):
+        return list(self._tasks.keys())
