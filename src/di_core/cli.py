@@ -1,46 +1,40 @@
 from __future__ import annotations
+import asyncio
+import json
+import typer
+from di_core.api import ExecuteRequest
+from di_core.runtime import Runtime
+from di_skills.skills.unscrew import Unscrew  # registers skill via import side-effect
 
-import argparse
-from typing import Dict
+app = typer.Typer(help="di.core MVP CLI")
 
-from di_core.api import Request
-from di_core.registry import list_skills
-from di_core.runtime import execute
+@app.command("skills")
+def skills(cmd: str = typer.Argument("list")):
+    from di_core.registry import registry
+    if cmd == "list":
+        for name in registry.list():
+            typer.echo(name)
+    else:
+        typer.echo("Unknown subcommand. Use: dimonta skills list")
 
+@app.command("exec")
+def exec_skill(skill_name: str, params_json: str = "{}"):
+    params = json.loads(params_json)
+    run_id = f"run-{skill_name.lower()}"
+    req = ExecuteRequest(skill_name=skill_name, instance_id=run_id, params=params)
+    rt = Runtime()
 
-def _parse_params(items: list[str]) -> Dict[str, str]:
-    params: Dict[str, str] = {}
-    for item in items:
-        key, _, value = item.partition("=")
-        params[key] = value
-    return params
+    async def _main():
+        async for st in rt.execute(req):
+            typer.echo(f"[{st.phase:>9}] {st.progress_pct:3d}% - {st.message}")
 
+    asyncio.run(_main())
 
-def main(argv: list[str] | None = None) -> int:
-    parser = argparse.ArgumentParser(prog="di-cli")
-    sub = parser.add_subparsers(dest="command")
+@app.command("abort")
+def abort(run_id: str):
+    rt = Runtime()
+    ok = rt.abort(run_id)
+    typer.echo("aborted" if ok else "not found or already finished")
 
-    sub.add_parser("list", help="List available skills")
-
-    exec_p = sub.add_parser("execute", help="Execute a skill")
-    exec_p.add_argument("name")
-    exec_p.add_argument("--param", action="append", default=[], help="key=value pairs")
-
-    args = parser.parse_args(argv)
-    if args.command == "list":
-        for name in list_skills():
-            print(name)
-        return 0
-
-    if args.command == "execute":
-        request = Request(name=args.name, params=_parse_params(args.param))
-        status = execute(request)
-        print(status)
-        return 0 if status.success else 1
-
-    parser.print_help()
-    return 1
-
-
-if __name__ == "__main__":  # pragma: no cover
-    raise SystemExit(main())
+if __name__ == "__main__":
+    app()

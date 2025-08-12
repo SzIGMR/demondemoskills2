@@ -1,21 +1,23 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
-from typing import Any, Dict, Optional
+from typing import Dict
 
 
 @dataclass
-class Request:
-    """Represents a skill execution request."""
+class ExecuteRequest:
+    """Request to execute a skill."""
 
-    name: str
-    params: Dict[str, Any]
+    skill_name: str
+    instance_id: str
+    params: Dict[str, str]
 
 
 @dataclass
-class Status:
-    """Result of executing a skill."""
+class ExecuteStatus:
+    """Status update emitted during execution."""
 
-    success: bool
-    result: Any = None
-    error: Optional[str] = None
+    instance_id: str
+    phase: str
+    message: str
+    progress_pct: int
