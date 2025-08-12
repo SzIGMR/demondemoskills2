@@ -21,8 +21,11 @@ class DetectScrews(Skill):
         await ctx.status("processing image", 20)
         await asyncio.sleep(0.1)
         # simulated detection result
-        screws = {"S1": (10.0, 20.0), "S2": (30.0, 40.0)}
-        ctx.dbase.set("screw_positions", screws)
+        screws = {
+            "S1": {"x": 10.0, "y": 20.0, "dismantled": True},
+            "S2": {"x": 30.0, "y": 40.0, "dismantled": True},
+        }
+        ctx.dbase.set("screws", screws)
         await ctx.status("screws detected", 90)
         await asyncio.sleep(0.1)
         return {"screw_ids": ",".join(screws.keys())}

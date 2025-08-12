@@ -14,22 +14,22 @@ class LocateScrew(Skill):
 
     async def precheck(self, ctx: SkillContext, params: Dict[str, str]) -> None:
         sid = params.get("screw_id")
-        screws = ctx.dbase.get("screw_positions", {}) or {}
+        screws = ctx.dbase.get("screws", {}) or {}
         if not sid:
             raise ValueError("param 'screw_id' is required")
-        if sid not in screws:
+        if sid not in screws or not screws[sid].get("dismantled", False):
             raise ValueError("unknown screw_id")
         await ctx.status("precheck ok", 5)
 
     async def execute(self, ctx: SkillContext, params: Dict[str, str]) -> Dict[str, str]:
         sid = params["screw_id"]
-        screws = ctx.dbase.get("screw_positions", {}) or {}
+        screws = ctx.dbase.get("screws", {}) or {}
         coarse = screws[sid]
         await ctx.status(f"move to {sid}", 20)
         await asyncio.sleep(0.1)
-        refined = (coarse[0] + 0.5, coarse[1] - 0.2)
-        screws[sid] = refined
-        ctx.dbase.set("screw_positions", screws)
+        refined = (coarse["x"] + 0.5, coarse["y"] - 0.2)
+        screws[sid]["x"], screws[sid]["y"] = refined
+        ctx.dbase.set("screws", screws)
         await ctx.status("position refined", 90)
         await asyncio.sleep(0.1)
         return {"x": str(refined[0]), "y": str(refined[1])}

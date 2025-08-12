@@ -14,15 +14,19 @@ class Unscrew(Skill):
 
     async def precheck(self, ctx: SkillContext, params: Dict[str, str]) -> None:
         target = params.get("target_id", "")
+        screws = ctx.dbase.get("screws", {}) or {}
         if not target:
             raise ValueError("param 'target_id' is required")
+        if target not in screws or not screws[target].get("dismantled", False):
+            raise ValueError("unknown target_id")
         await ctx.status(f"precheck ok for {target}", 5)
 
     async def execute(self, ctx: SkillContext, params: Dict[str, str]) -> Dict[str, str]:
         torque = params.get("torque", "5")
         target = params["target_id"]
-        positions = ctx.dbase.get("screw_positions", {}) or {}
-        pos = positions.get(target, (0, 0))
+        screws = ctx.dbase.get("screws", {}) or {}
+        info = screws.get(target, {})
+        pos = (info.get("x", 0), info.get("y", 0))
         await ctx.status(f"move to {target} at {pos}", 15)
         await asyncio.sleep(0.1)  # simulate motion
         await ctx.status(f"set torque {torque}Nm", 25)
@@ -33,6 +37,6 @@ class Unscrew(Skill):
             await asyncio.sleep(0.1)
         await ctx.status("retract tool", 95)
         await asyncio.sleep(0.1)
-        positions.pop(target, None)
-        ctx.dbase.set("screw_positions", positions)
+        screws[target]["dismantled"] = False
+        ctx.dbase.set("screws", screws)
         return {"removed": "true", "time_s": "0.7"}
