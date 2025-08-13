@@ -48,6 +48,18 @@ dimonta web config --port 8000
 
 Open ``http://localhost:8000`` in your browser and adjust the JSON as needed.
 
+### YOLO Result Viewer
+
+After running detection skills you can inspect the stored image and screw
+positions in a simple browser-based UI:
+
+```bash
+dimonta web results --port 8001
+```
+
+Open ``http://localhost:8001`` to view the image with annotated detections and
+their coordinates.
+
 ## Demo Ideas
 
 - **Manual Full Screw Workflow** – Run a sequence of skills to detect screws,

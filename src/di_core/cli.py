@@ -78,6 +78,16 @@ def web_config(host: str = "localhost", port: int = 8000):
 
     uvicorn.run(webapp, host=host, port=port)
 
+
+@web_app.command("results")
+def web_results(host: str = "localhost", port: int = 8001):
+    """Launch the detection results web UI."""
+
+    import uvicorn
+    from di_core.results_web import app as webapp
+
+    uvicorn.run(webapp, host=host, port=port)
+
 app.add_typer(web_app, name="web")
 
 
