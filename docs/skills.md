@@ -1,10 +1,11 @@
 # Skill Documentation
 
-## CaptureRealSenseImage (v1.1.0)
+## CaptureRealSenseImage (v1.2.0)
 Capture an image from an Intel RealSense camera and store it in the database.
 
 **Inputs**
-- `use_camera`: Set to `true` to read from a RealSense camera, otherwise a dummy image is produced
+- `use_camera`: Set to `true` to read from a RealSense camera, otherwise a sample PNG is stored
+- `sample_dir`: Directory containing PNG images to use when the camera is unavailable
 
 **Outputs**
 - `image_key`: Database key where the image is stored

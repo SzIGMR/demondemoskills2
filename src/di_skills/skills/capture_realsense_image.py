@@ -2,6 +2,7 @@ from __future__ import annotations
 import asyncio
 import base64
 from typing import Dict
+from pathlib import Path
 from di_skills.base import Skill, SkillContext, register
 
 try:  # pragma: no cover - optional hardware libraries
@@ -24,15 +25,16 @@ class CaptureRealSenseImage(Skill):
     """Capture an image from an Intel RealSense camera and store it in the database."""
 
     NAME = "CaptureRealSenseImage"
-    VERSION = "1.1.0"
+    VERSION = "1.2.0"
     INPUTS: Dict[str, str] = {
-        "use_camera": "Set to 'true' to read from a RealSense camera, otherwise a dummy image is stored",
+        "use_camera": "Set to 'true' to read from a RealSense camera, otherwise a sample PNG is stored",
+        "sample_dir": "Optional directory with PNG images when the camera is unavailable",
     }
     OUTPUTS = {"image_key": "Database key where the image is stored"}
 
     async def precheck(self, ctx: SkillContext, params: Dict[str, str]) -> None:
         if params.get("use_camera", "false").lower() != "true":
-            await ctx.status("using dummy image", 5)
+            await ctx.status("using sample image", 5)
             return
         if rs is None or np is None or cv2 is None:  # pragma: no cover - import check
             raise RuntimeError(
@@ -55,7 +57,12 @@ class CaptureRealSenseImage(Skill):
             _, buf = cv2.imencode(".png", image)
             data_b64 = base64.b64encode(buf.tobytes()).decode()
         else:
-            data_b64 = PIXEL
+            image_dir = Path(params.get("sample_dir", Path(__file__).parent))
+            pngs = sorted(image_dir.glob("*.png"))
+            if pngs:
+                data_b64 = base64.b64encode(pngs[0].read_bytes()).decode()
+            else:
+                data_b64 = PIXEL
         ctx.dbase.set("camera_image", {"format": "png", "data": data_b64})
         await ctx.status("image captured", 95)
         await asyncio.sleep(0.1)
