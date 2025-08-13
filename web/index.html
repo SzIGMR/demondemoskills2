@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <title>di.monta Skill Runner</title>
+</head>
+<body>
+  <h1>Run Skill</h1>
+  <label>Skill: <input id="skill" value="Unscrew"/></label><br/>
+  <label>Params JSON:<br/>
+    <textarea id="params" rows="4" cols="40">{"target_id": "A1"}</textarea>
+  </label><br/>
+  <button id="run">Run</button>
+  <pre id="log"></pre>
+  <script>
+    const runBtn = document.getElementById('run');
+    const log = document.getElementById('log');
+    runBtn.onclick = () => {
+      log.textContent = '';
+      const ws = new WebSocket('ws://localhost:8000/ws/execute');
+      ws.onopen = () => {
+        let params = {};
+        try {
+          const txt = document.getElementById('params').value || '{}';
+          params = JSON.parse(txt);
+        } catch (e) {
+          alert('Invalid JSON in params');
+          ws.close();
+          return;
+        }
+        ws.send(JSON.stringify({skill_name: document.getElementById('skill').value, params: params}));
+      };
+      ws.onmessage = (ev) => {
+        log.textContent += ev.data + '\n';
+      };
+      ws.onclose = () => {
+        log.textContent += '[closed]\n';
+      };
+    };
+  </script>
+</body>
+</html>

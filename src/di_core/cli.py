@@ -16,7 +16,6 @@ web_app = typer.Typer(help="Web utilities")
 
 app.add_typer(skills_app, name="skills")
 app.add_typer(db_app, name="db")
-web_app = typer.Typer(help="Web utilities")
 app.add_typer(web_app, name="web")
 
 @skills_app.command("list")
@@ -87,9 +86,6 @@ def web_results(host: str = "localhost", port: int = 8001):
     from di_core.results_web import app as webapp
 
     uvicorn.run(webapp, host=host, port=port)
-
-app.add_typer(web_app, name="web")
-
 
 def main() -> None:
     app()

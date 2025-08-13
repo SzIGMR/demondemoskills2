@@ -60,6 +60,19 @@ dimonta web results --port 8001
 Open ``http://localhost:8001`` to view the image with annotated detections and
 their coordinates.
 
+### Headless Server
+
+Run the FastAPI based server to execute skills via HTTP, WebSocket or XML:
+
+```bash
+uvicorn di_core.server:app --reload
+```
+
+`GET /skills` lists all registered skills. To run a skill send a JSON payload
+to `POST /execute` or connect to the WebSocket endpoint at
+`ws://localhost:8000/ws/execute`. A minimal HTML client is available at
+`web/index.html`.
+
 ## Demo Ideas
 
 - **Manual Full Screw Workflow** – Run a sequence of skills to detect screws,
