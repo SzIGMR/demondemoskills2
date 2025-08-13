@@ -11,4 +11,4 @@ To use a physical camera:
 3. The captured image is stored in the database under the key `camera_image`.
 
 If no camera is available, omit the parameter or set `use_camera=false`.
-A small dummy image will be written to the database so dependent skills can still run.
+The skill will store the first PNG image found in its directory (or an optional `sample_dir`) in the database so dependent skills can still run.
