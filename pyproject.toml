@@ -3,7 +3,7 @@ requires = ["setuptools>=68", "wheel"]
 build-backend = "setuptools.build_meta"
 
 [project]
-name = "dimonta-core-mvp"
+name = "dimonta-core"
 version = "0.1.0"
 description = "di.core MVP with internal skill communication"
 authors = [{ name = "di.monta" }]
@@ -20,8 +20,8 @@ dependencies = [
 
 [project.scripts]
 dimonta = "di_core.cli:app"
-skill-docs = "di_skills.docgen:main"
+skill-docs = "tools.skill_docs:main"
 
 [tool.setuptools]
 package-dir = {"" = "src"}
-packages = ["di_core", "di_skills", "di_base_client", "di_skills.skills", "di_skills.templates.python"]
+packages = ["di_core", "di_skills", "di_base_client", "di_skills.skills", "di_skills.templates.python", "tools"]
