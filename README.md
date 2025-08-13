@@ -83,3 +83,8 @@ Open ``http://localhost:8000`` in your browser and adjust the JSON as needed.
 
 These examples are a starting point for experimenting with new skills or
 building larger robotic workflows on top of the framework.
+
+## Additional Hardware/Model Setup
+
+- [RealSense camera instructions](docs/realsense.md)
+- [YOLO model instructions](docs/yolo.md)
